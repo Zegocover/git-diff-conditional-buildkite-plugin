@@ -12,6 +12,7 @@ Please prefix commits with the following tags depending on what they are targeti
 - `[tests]` - Updates to tests
 - `[docs]` - Documentation updates
 - `[format]` - Commits related to formatting of the code
+- `[ci]` - commits related to github actions
 
 Use long-descriptions to go into more depth if it is required
 
