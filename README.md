@@ -80,6 +80,8 @@ git diff --name-only origin/master...HEAD
 git diff --name-only HEAD HEAD~1
 ```
 
+Both of the above commands are run, in their order listed above to detect if there is any `diff`. If there isn't any `diff` then there will be no `dynamic_pipeline` uploaded. If you wish to disable the plugin temporarily then see the above [Configuration](#Configuration)
+
 Depending on your [merge strategy](https://help.github.com/en/github/administering-a-repository/about-merge-methods-on-github), you might need to use different `diff` commands.
 
 ## Contributing
