@@ -13,39 +13,43 @@ But what about [mono-repo-diff](https://github.com/chronotc/monorepo-diff-buildk
 
 Please see the below examples on how to use this plugin with buildkite. The [buildkite-agent](https://buildkite.com/docs/agent/v3) also requires access to `docker`.
 
-### Simple Example
+### Example
 
+`initial_pipeline`
 ```yaml
 steps:
   - label: ":partyparrot: Creating the pipeline"
     plugins:
       - ssh://git@github.com/Zegocover/git-diff-conditional-buildkite-plugin#v1.0.0:
-          dynamic_pipeline: ".buildkite/pipeline.yml"
+          dynamic_pipeline: ".buildkite/dynamic_pipeline.yml"
           steps:
-            - label: "terraform plan"
+            - label: "build and deploy lambda"
               include:
-                - "terraform/"
-            - label: "make upload"
-              exclude:
-                - "python/"
+                - "function_code/*"
 ```
 
-### Complex Example
-
+`dynamic_pipeline`
 ```yaml
 steps:
-  - label: ":partyparrot: Creating the pipeline"
-    plugins:
-      - ssh://git@github.com/Zegocover/git-diff-conditional-buildkite-plugin#v1.0.0:
-          dynamic_pipeline: ".buildkite/pipeline.yml"
-          steps:
-            - label: "terraform plan"
-              include:
-                - "terraform/"
-            - label: "make upload"
-              exclude:
-                - "python/"
+  - label: "build and deploy lambda"
+    commands:
+      - make lambda
+    agents:
+      queue: awesome
+    timeout_in_minutes: 10
+
+  - wait
+
+  - label: "terraform apply"
+    commands:
+      - terraform apply
+    agents:
+      queue: awesome
+    timeout_in_minutes: 10
 ```
+
+The above example `initial_pipeline` will skip the `build and deploy lambda` step unless there has been a change to the `function_code` directory. Everything else in the `dynamic_pipeline` file will be left intact and passed through to buildkite. It is possible to configure numerous `label` fields, using the configuration options below.
+
 
 ## Configuration
 
@@ -66,10 +70,10 @@ Other useful things to note:
 
 ### `diff` command
 
-The default `diff` commands are:
+The default `diff` commands are (run in the order shown):
 
 ```bash
-# Useful for feature branch git diff check against master
+# Used to check if on a feature branch and check diff against master
 git diff --name-only origin/master...HEAD
 
 # Useful for checking master against master in a merge commit strategy environment
@@ -81,16 +85,6 @@ Depending on your [merge strategy](https://help.github.com/en/github/administeri
 ## Contributing
 
 Please read [CONTRIBUTING](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/blob/master/.github/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-### Running the tests
-
-Ensure that all your tests are located within the `tests` directory and then run:
-
-```bash
-docker-compose up --build
-```
-
-The python code should be formatted with [black](https://pypi.org/project/black/) and [isort](https://pypi.org/project/isort/)
 
 ## Versioning
 
