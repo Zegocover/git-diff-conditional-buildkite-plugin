@@ -37,18 +37,21 @@ def test_load_dynamic_pipeline_success(
 ):
     file_name_env_var = f"{PLUGIN_PREFIX}_{file_name_env_var_suffix}"
     open_mock = mocker.patch(
-        "builtins.open", mocker.mock_open(read_data="""
+        "builtins.open",
+        mocker.mock_open(
+            read_data="""
 steps:
   - label: test
     queue: test
-""")
+"""
+        ),
     )
 
     result = git_diff_conditional.load_dynamic_pipeline(file_name_env_var_suffix)
 
     # Tests
 
-    assert result == {'steps': [{'label': 'test', 'queue': 'test'}]}
+    assert result == {"steps": [{"label": "test", "queue": "test"}]}
 
     open_mock.assert_called_once_with("pipeline.yml", "r")
     assert logger.record_tuples == [

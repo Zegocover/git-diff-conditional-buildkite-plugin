@@ -25,7 +25,8 @@ def test_upload_pipeline_failure(mocker, logger, log_and_exit_mock, test_pipelin
     # test_command = "Error"
     exit_code = 1
     subprocess_mock = mocker.patch(
-        "scripts.generate_pipeline.subprocess.run", side_effect=subprocess.CalledProcessError(exit_code, "boom")
+        "scripts.generate_pipeline.subprocess.run",
+        side_effect=subprocess.CalledProcessError(exit_code, "boom"),
     )
 
     upload_pipeline(test_pipeline)

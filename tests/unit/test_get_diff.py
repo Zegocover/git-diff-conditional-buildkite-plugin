@@ -1,5 +1,7 @@
 import subprocess
+
 import pytest
+
 from CONSTANTS import PLUGIN_PREFIX
 from scripts.generate_pipeline import get_diff, run_command
 
@@ -8,9 +10,18 @@ from scripts.generate_pipeline import get_diff, run_command
 #
 
 
-@pytest.mark.parametrize("subprocess_return_value,expected_result", [("""test.py
+@pytest.mark.parametrize(
+    "subprocess_return_value,expected_result",
+    [
+        (
+            """test.py
         folder_a/test.tf
-        folder_a/folder_b/test.txt""", ["test.py", "folder_a/test.tf", "folder_a/folder_b/test.txt"]), ("", [])])
+        folder_a/folder_b/test.txt""",
+            ["test.py", "folder_a/test.tf", "folder_a/folder_b/test.txt"],
+        ),
+        ("", []),
+    ],
+)
 def test_run_command(mocker, logger, subprocess_return_value, expected_result):
     """
     Checks that the expected_result is returned given an expected input
@@ -105,6 +116,10 @@ def test_get_diff_no_diff(mocker):
 
     # Tests
     run_command_mock.assert_has_calls(
-        [mocker.call("git diff --name-only origin/master...HEAD"), mocker.call("git diff --name-only HEAD HEAD~1")], any_order=False
+        [
+            mocker.call("git diff --name-only origin/master...HEAD"),
+            mocker.call("git diff --name-only HEAD HEAD~1"),
+        ],
+        any_order=False,
     )
     assert result == run_command_mock.return_value
