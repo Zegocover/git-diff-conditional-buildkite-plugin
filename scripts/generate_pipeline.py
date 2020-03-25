@@ -157,8 +157,6 @@ def run_command(diff_command: str) -> list:
     Returns:
         list: Contains all the files changed according to git
     """
-    LOG.info("Getting git diff using: (%s)", diff_command)
-
     try:
         result = subprocess.run(
             diff_command, check=True, stdout=subprocess.PIPE, shell=True
@@ -184,7 +182,10 @@ def get_diff(plugin_prefix):
             if diff:
                 break
     else:
-        diff = run_command(diff_command)
+        command = diff_command
+        diff = run_command(command)
+
+    LOG.info("Got diff using command (%s)", command)
 
     return diff
 

@@ -22,7 +22,7 @@ from scripts.generate_pipeline import get_diff, run_command
         ("", []),
     ],
 )
-def test_run_command(mocker, logger, subprocess_return_value, expected_result):
+def test_run_command(mocker, subprocess_return_value, expected_result):
     """
     Checks that the expected_result is returned given an expected input
     """
@@ -38,9 +38,6 @@ def test_run_command(mocker, logger, subprocess_return_value, expected_result):
 
     # Tests
     assert result == expected_result
-    assert logger.record_tuples == [
-        ("cli", 20, f"Getting git diff using: ({test_command})")
-    ]
     subprocess_mock.assert_called_once_with(
         test_command, check=True, stdout=-1, shell=True
     )
@@ -59,7 +56,6 @@ def test_run_command_raises_error(mocker, logger, log_and_exit_mock):
     # Tests
     assert result is None
     assert logger.record_tuples == [
-        ("cli", 20, f"Getting git diff using: ({test_command})"),
         ("cli", 10, f"Command '{test_command}' returned non-zero exit status 1."),
     ]
     subprocess_mock.assert_called_once_with(
@@ -75,18 +71,44 @@ def test_run_command_raises_error(mocker, logger, log_and_exit_mock):
 #
 
 
-def test_get_diff(mocker):
+@pytest.mark.parametrize(
+    "command_to_return_on,expected_calls",
+    [
+        (
+            "git diff --name-only origin/master...HEAD",  # Test feature branch
+            ["git diff --name-only origin/master...HEAD"],
+        ),
+        (
+            "git diff --name-only HEAD HEAD~1",  # Test master against master - 1 commmit
+            [
+                "git diff --name-only origin/master...HEAD",
+                "git diff --name-only HEAD HEAD~1",
+            ],
+        ),
+    ],
+)
+def test_get_diff(mocker, command_to_return_on, expected_calls):
+    return_value = ["test.py", "folder_a/test.py"]
+
+    def side_effect(command):
+        if command == command_to_return_on:
+            result = return_value
+        else:
+            result = []
+
+        return result
+
     run_command_mock = mocker.patch(
-        "scripts.generate_pipeline.run_command", return_value=["diff.py"]
+        "scripts.generate_pipeline.run_command", side_effect=side_effect
     )
 
     result = get_diff(PLUGIN_PREFIX)
 
     # Tests
-    run_command_mock.assert_called_once_with(
-        "git diff --name-only origin/master...HEAD"
+    run_command_mock.assert_has_calls(
+        [mocker.call(call) for call in expected_calls], any_order=False,
     )
-    assert result == run_command_mock.return_value
+    assert result == return_value
 
 
 def test_get_diff_custom(monkeypatch, mocker):
