@@ -3,6 +3,7 @@
 import logging
 import os
 import re
+import sys
 import subprocess
 from fnmatch import fnmatch
 
@@ -18,7 +19,7 @@ def log_and_exit(log_level: str, log_message: str, exit_code: int) -> None:
     """Handles the log_message and exit_code"""
     logger = getattr(LOG, log_level.lower())
     logger(log_message)
-    exit(exit_code)
+    sys.exit(exit_code)
 
 
 class GitDiffConditional:

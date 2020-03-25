@@ -1,5 +1,5 @@
 import subprocess
-
+import pytest
 from CONSTANTS import PLUGIN_PREFIX
 from scripts.generate_pipeline import get_diff, run_command
 
@@ -8,16 +8,15 @@ from scripts.generate_pipeline import get_diff, run_command
 #
 
 
-def test_run_command_success(mocker, logger):
-    """
-    This checks that the correct amount of files are returned based on the directory
-    """
-
-    subprocess_return_value = """test.py
+@pytest.mark.parametrize("subprocess_return_value,expected_result", [("""test.py
         folder_a/test.tf
-        folder_a/folder_b/test.txt"""
+        folder_a/folder_b/test.txt""", ["test.py", "folder_a/test.tf", "folder_a/folder_b/test.txt"]), ("", [])])
+def test_run_command(mocker, logger, subprocess_return_value, expected_result):
+    """
+    Checks that the expected_result is returned given an expected input
+    """
 
-    subprocess_mock = mocker.patch("subprocess.run")
+    subprocess_mock = mocker.patch("scripts.generate_pipeline.subprocess.run")
 
     test_command = "git diff"
     subprocess_mock.return_value = mocker.Mock(
@@ -27,36 +26,7 @@ def test_run_command_success(mocker, logger):
     result = run_command(test_command)
 
     # Tests
-    assert result == list(
-        subprocess_return_value.replace(" ", "").strip("\t").split("\n")
-    )
-    assert logger.record_tuples == [
-        ("cli", 20, f"Getting git diff using: ({test_command})")
-    ]
-    subprocess_mock.assert_called_once_with(
-        test_command, check=True, stdout=-1, shell=True
-    )
-
-
-def test_run_command_returns_empty_list(mocker, logger):
-    """
-    Checks that an empty list is returned if git diff has no diff
-    """
-
-    subprocess_return_value = ""
-
-    subprocess_mock = mocker.patch("subprocess.run")
-
-    test_command = "NO DIFF"
-    subprocess_mock.return_value = mocker.Mock(
-        stdout=bytes(subprocess_return_value, "UTF-8")
-    )
-
-    result = run_command(test_command)
-
-    # Tests
-    assert isinstance(result, list)
-    assert len(result) == 0
+    assert result == expected_result
     assert logger.record_tuples == [
         ("cli", 20, f"Getting git diff using: ({test_command})")
     ]
@@ -109,6 +79,8 @@ def test_get_diff(mocker):
 
 
 def test_get_diff_custom(monkeypatch, mocker):
+    "Test that run_command is called with the passed custom git diff command"
+
     custom_diff_command = "custom diff command"
     monkeypatch.setenv(f"{PLUGIN_PREFIX}_DIFF", custom_diff_command)
     run_command_mock = mocker.patch(
@@ -123,6 +95,8 @@ def test_get_diff_custom(monkeypatch, mocker):
 
 
 def test_get_diff_no_diff(mocker):
+    "Test that run_command is called twice with both default commands"
+
     run_command_mock = mocker.patch(
         "scripts.generate_pipeline.run_command", return_value=[]
     )
@@ -131,6 +105,6 @@ def test_get_diff_no_diff(mocker):
 
     # Tests
     run_command_mock.assert_has_calls(
-        [mocker.call("git diff --name-only origin/master...HEAD")], any_order=True
+        [mocker.call("git diff --name-only origin/master...HEAD"), mocker.call("git diff --name-only HEAD HEAD~1")], any_order=False
     )
     assert result == run_command_mock.return_value

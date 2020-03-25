@@ -37,19 +37,20 @@ def test_load_dynamic_pipeline_success(
 ):
     file_name_env_var = f"{PLUGIN_PREFIX}_{file_name_env_var_suffix}"
     open_mock = mocker.patch(
-        "builtins.open", mocker.mock_open(read_data="steps: - label")
+        "builtins.open", mocker.mock_open(read_data="""
+steps:
+  - label: test
+    queue: test
+""")
     )
-
-    yaml_load_patch = mocker.patch("yaml.safe_load", return_value={"steps": ["label"]})
 
     result = git_diff_conditional.load_dynamic_pipeline(file_name_env_var_suffix)
 
     # Tests
 
-    assert result == yaml_load_patch.return_value
+    assert result == {'steps': [{'label': 'test', 'queue': 'test'}]}
 
     open_mock.assert_called_once_with("pipeline.yml", "r")
-    yaml_load_patch.assert_called_once_with(open_mock.return_value)
     assert logger.record_tuples == [
         (LOGGER_NAME, 20, f"Checking env var: {file_name_env_var} for file name")
     ]
@@ -85,10 +86,8 @@ def test_load_dynamic_pipeline_bad_yaml(
 ):
     file_name_env_var = f"{PLUGIN_PREFIX}_{file_name_env_var_suffix}"
     open_mock = mocker.patch(
-        "builtins.open", mocker.mock_open(read_data="steps: - label")
+        "builtins.open", mocker.mock_open(read_data="bad_yaml: - :")
     )
-
-    yaml_load_patch = mocker.patch("yaml.safe_load", side_effect=ScannerError)
 
     result = git_diff_conditional.load_dynamic_pipeline(file_name_env_var_suffix)
 
@@ -96,7 +95,6 @@ def test_load_dynamic_pipeline_bad_yaml(
     assert result is None
 
     open_mock.assert_called_once_with("pipeline.yml", "r")
-    yaml_load_patch.assert_called()
     assert logger.record_tuples == [
         (LOGGER_NAME, 20, f"Checking env var: {file_name_env_var} for file name"),
         (LOGGER_NAME, 40, "Invalid YAML in File: pipeline.yml"),
