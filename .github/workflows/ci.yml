@@ -3,7 +3,7 @@ on:
   [push]
 jobs:
   Linting:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Run Buildkite Plugin Linter
@@ -13,7 +13,7 @@ jobs:
       - name: Run python isort (import order)
         run: docker-compose run --rm python_isort
   Tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - name: Run Python Pytest
