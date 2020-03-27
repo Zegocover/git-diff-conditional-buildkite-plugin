@@ -1,0 +1,31 @@
+---
+version: "3"
+services:
+  buildkite_plugin_linter:
+    image: buildkite/plugin-linter
+    command: [
+      --id, ssh://git@github.com/Zegocover/git-diff-conditional-buildkite-plugin
+    ]
+    volumes:
+      - .:/plugin
+  python_pytest:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    command: ["pytest"]
+    volumes:
+      - .:/buildkite
+  python_black:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    command: ["black", ".", "--check", "--diff"]
+    volumes:
+      - .:/buildkite
+  python_isort:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    command: ["isort", ".", "--check-only", "--recursive"]
+    volumes:
+      - .:/buildkite

@@ -1,0 +1,20 @@
+name: Run CI Testing & Linting
+on:
+  [push]
+jobs:
+  Linting:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Buildkite Plugin Linter
+        run: docker-compose run --rm buildkite_plugin_linter
+      - name: Run python black (code formatting)
+        run: docker-compose run --rm python_black
+      - name: Run python isort (import order)
+        run: docker-compose run --rm python_isort
+  Tests:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Python Pytest
+        run: docker-compose run --rm python_pytest
