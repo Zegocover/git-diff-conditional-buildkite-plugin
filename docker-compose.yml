@@ -4,7 +4,7 @@ services:
   buildkite_plugin_linter:
     image: buildkite/plugin-linter
     command: [
-      --id, ssh://git@github.com/Zegocover/git-diff-conditional-buildkite-plugin
+      --id, Zegocover/git-diff-conditional
     ]
     volumes:
       - .:/plugin

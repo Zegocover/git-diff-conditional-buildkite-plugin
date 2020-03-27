@@ -1,6 +1,6 @@
 # git-diff-conditional-buildkite-plugin
 
-![Github Actions: CI](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/workflows/CI/badge.svg)
+![Github Actions: Testing & Linting](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/workflows/Run%20CI%20Testing%20&%20Linting/badge.svg)
 
 This plugin can be used to create a dynamic pipeline based on your `git diff`. This requires TWO pipeline files in total and uses `docker` to run the plugin:
 
@@ -20,7 +20,7 @@ Please see the below examples on how to use this plugin with buildkite. The [bui
 steps:
   - label: ":partyparrot: Creating the pipeline"
     plugins:
-      - ssh://git@github.com/Zegocover/git-diff-conditional-buildkite-plugin#v1.0.0:
+      - Zegocover/git-diff-conditional#v0.1.0:
           dynamic_pipeline: ".buildkite/dynamic_pipeline.yml"
           steps:
             - label: "build and deploy lambda"
