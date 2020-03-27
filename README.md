@@ -84,6 +84,8 @@ Both of the above commands are run, in their order listed above to detect if the
 
 Depending on your [merge strategy](https://help.github.com/en/github/administering-a-repository/about-merge-methods-on-github), you might need to use different `diff` commands.
 
+We are assuming that you are using a squash and merge strategy on the master branch
+
 ## Contributing
 
 Please read [CONTRIBUTING](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/blob/master/.github/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
