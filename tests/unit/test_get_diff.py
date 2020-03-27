@@ -47,7 +47,7 @@ def test_run_command_raises_error(mocker, logger, log_and_exit_mock):
     test_command = "Error"
     exit_code = 1
     subprocess_mock = mocker.patch(
-        "subprocess.run",
+        "scripts.generate_pipeline.subprocess.run",
         side_effect=subprocess.CalledProcessError(exit_code, test_command),
     )
 

@@ -37,7 +37,7 @@ def test_load_dynamic_pipeline_success(
 ):
     file_name_env_var = f"{PLUGIN_PREFIX}_{file_name_env_var_suffix}"
     open_mock = mocker.patch(
-        "builtins.open",
+        "scripts.generate_pipeline.open",
         mocker.mock_open(
             read_data="""
 steps:
@@ -64,8 +64,10 @@ def test_load_dynamic_pipeline_file_not_found(
 ):
     file_name_env_var = f"{PLUGIN_PREFIX}_{file_name_env_var_suffix}"
 
-    open_mock = mocker.patch("builtins.open", side_effect=FileNotFoundError)
-    yaml_load_patch = mocker.patch("yaml.safe_load")
+    open_mock = mocker.patch(
+        "scripts.generate_pipeline.open", side_effect=FileNotFoundError
+    )
+    yaml_load_patch = mocker.patch("scripts.generate_pipeline.yaml.safe_load")
 
     result = git_diff_conditional.load_dynamic_pipeline(file_name_env_var_suffix)
 
@@ -89,7 +91,7 @@ def test_load_dynamic_pipeline_bad_yaml(
 ):
     file_name_env_var = f"{PLUGIN_PREFIX}_{file_name_env_var_suffix}"
     open_mock = mocker.patch(
-        "builtins.open", mocker.mock_open(read_data="bad_yaml: - :")
+        "scripts.generate_pipeline.open", mocker.mock_open(read_data="bad_yaml: - :")
     )
 
     result = git_diff_conditional.load_dynamic_pipeline(file_name_env_var_suffix)
