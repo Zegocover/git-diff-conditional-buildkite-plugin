@@ -9,4 +9,6 @@ WORKDIR "/buildkite"
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python3", "scripts/generate_pipeline.py"]
+COPY scripts/generate_pipeline.py /usr/local/bin/
+
+CMD ["generate_pipeline.py"]
