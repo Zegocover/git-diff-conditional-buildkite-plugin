@@ -5,4 +5,12 @@ basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
 
 docker build $basedir -t buildkite-pyyaml > /dev/null
 
-docker run --rm -v "$PWD:/buildkite" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
+set +u
+MIRROS_PATH=${BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_GIT_MIRRORS_PATH}
+set -u
+
+if [[ -z "${MIRROS_PATH}" ]]; then
+  docker run --rm -v "$PWD:/buildkite" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
+else
+  docker run --rm -v "$PWD:/buildkite" -v "${MIRROS_PATH}":"${MIRROS_PATH}" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
+fi
