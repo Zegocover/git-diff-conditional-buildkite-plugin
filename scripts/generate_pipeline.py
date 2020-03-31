@@ -134,7 +134,7 @@ class GitDiffConditional:
 
     @staticmethod
     def check_if_skip(conditional_steps: dict, step: dict) -> bool:
-        label = step["label"]
+        label = step["label"] if "label" in step else step["block"]
 
         if "skip" in step:
             # Skip setings already exist
