@@ -205,8 +205,11 @@ def test_load_conditions_from_environment(
         (
             [{"label": "test_4_label"}, {"block": "test_4_block"}],
             {"test_4_label": True, "test_4_block": True},
-            [{"label": "test_4_label", "skip": True}, {"block": "test_4_block", "skip": True}],
-        )
+            [
+                {"label": "test_4_label", "skip": True},
+                {"block": "test_4_block", "skip": True},
+            ],
+        ),  # Check label and block
     ],
 )
 def test_generate_pipeline_from_conditions(
