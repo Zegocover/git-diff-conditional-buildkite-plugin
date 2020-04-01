@@ -1,16 +1,53 @@
 #!/bin/bash
 set -euo pipefail
 
+set +u
+# Check if the plugin is disabled
+if [[ ! -z "$BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DISABLE_PLUGIN" ]]; then
+  echo "Plugin disable flag detected, passing entire pipeline to buildkite"
+  buildkite-agent pipeline upload $BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DYNAMIC_PIPELINE
+  exit 0
+fi
+set -u
+
+f_get_diff() {
+  local default_diff_commands
+  local diff_commands
+
+  default_diff_commands="git diff --name-only origin/master...HEAD,git diff --name-only HEAD HEAD~1"
+
+  IFS=','
+  read -a diff_commands <<< "${BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DIFF:-$default_diff_commands}"
+
+  for diff_command in ${diff_commands[@]}; do
+    echo >&2 "Checking for diff using: ($diff_command)"
+
+    diff=$(eval $diff_command)
+    if [[ ! -z "$diff" ]]; then
+      echo >&2 "Found diff using command ($diff_command)"
+      break
+    fi
+  done
+
+  echo "$diff"
+}
+
 basedir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )"
+
+diff=$(f_get_diff)
+if [[ -z "$diff" ]]; then
+  echo "No diff detected"
+  exit 0
+else
+  mkdir -p .git_diff_conditional
+  echo $diff > .git_diff_conditional/git_diff
+fi
 
 docker build $basedir -t buildkite-pyyaml > /dev/null
 
-set +u
-MIRROS_PATH=${BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_GIT_MIRRORS_PATH}
-set -u
+docker run --rm -v "$PWD:/buildkite" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
 
-if [[ -z "${MIRROS_PATH}" ]]; then
-  docker run --rm -v "$PWD:/buildkite" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
-else
-  docker run --rm -v "$PWD:/buildkite" -v "${MIRROS_PATH}":"${MIRROS_PATH}" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
+if [[ -s ".git_diff_conditional/pipeline_output" ]]; then
+  echo "Uploading the pipeline to the buildkite-agent"
+  buildkite-agent pipeline upload .git_diff_conditional/pipeline_output
 fi
