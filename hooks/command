@@ -3,9 +3,9 @@ set -euo pipefail
 
 set +u
 # Check if the plugin is disabled
-if [[ ! -z "$BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DISABLE_PLUGIN" ]]; then
+if [[ -n "$BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DISABLE_PLUGIN" ]]; then
   echo "Plugin disable flag detected, passing entire pipeline to buildkite"
-  buildkite-agent pipeline upload $BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DYNAMIC_PIPELINE
+  buildkite-agent pipeline upload "$BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DYNAMIC_PIPELINE"
   exit 0
 fi
 set -u
@@ -17,13 +17,13 @@ f_get_diff() {
   default_diff_commands="git diff --name-only origin/master...HEAD,git diff --name-only HEAD HEAD~1"
 
   IFS=','
-  read -a diff_commands <<< "${BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DIFF:-$default_diff_commands}"
+  read -r -a diff_commands <<< "${BUILDKITE_PLUGIN_GIT_DIFF_CONDITIONAL_DIFF:-$default_diff_commands}"
 
-  for diff_command in ${diff_commands[@]}; do
+  for diff_command in "${diff_commands[@]}"; do
     echo >&2 "Checking for diff using: ($diff_command)"
 
-    diff=$(eval $diff_command)
-    if [[ ! -z "$diff" ]]; then
+    diff=$(eval "$diff_command")
+    if [[ -n "$diff" ]]; then
       echo >&2 "Found diff using command ($diff_command)"
       break
     fi
@@ -40,10 +40,10 @@ if [[ -z "$diff" ]]; then
   exit 0
 else
   mkdir -p .git_diff_conditional
-  echo $diff > .git_diff_conditional/git_diff
+  echo "$diff" > .git_diff_conditional/git_diff
 fi
 
-docker build $basedir -t buildkite-pyyaml > /dev/null
+docker build "$basedir" -t buildkite-pyyaml > /dev/null
 
 docker run --rm -v "$PWD:/buildkite" --env-file <(env | grep BUILDKITE) buildkite-pyyaml
 
