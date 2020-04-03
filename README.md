@@ -53,17 +53,16 @@ The above example `initial_pipeline` will skip the `build and deploy lambda` ste
 
 ## Configuration
 
-| Option           | Required |   Type    | Default | Description                                                                                                                                                                   |
-| ---------------- | :------: | :-------: | :-----: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| dynamic_pipeline |   Yes    | `string`  |         | The name including the path to the pipeline that contains all the actual `steps`                                                                                              |
-| git_mirrors_path |    No    | `string`  |         | The Path that the agent uses for `git-mirror-path`, This will be mounted into the container. See [git mirrors](https://github.com/buildkite/agent/blob/master/EXPERIMENTS.md) |
-| disable_plugin   |    No    | `boolean` | `false` | This can be used to pass the entire `dynamic_pipeline` pipeline straight to buildkite without skipping a single step.                                                         |
-| diff             |    No    | `string`  |         | Can be used to override the default commands (see below for a better explanation of the defaults)                                                                             |
-| log_level        |    No    | `string`  | `INFO`  | The Level of logging to be used by the python script underneath. Pass `DEBUG` for verbose logging if errors occur                                                             |
-| steps            |   Yes    |  `array`  |         | Each Step should contain a `label` with the `include`/`exclude` settings relevant to the label it applies to within the `dynamic_pipeline` file                               |
-| label            |   Yes    | `string`  |         | The `label` these conditions apply to within the `dynamic_pipeline` file. (These should be an EXACT match)                                                                    |
-| include          |    No    |  `array`  |         | If any element is found within the `git diff` then this step will NOT be skipped                                                                                              |
-| exclude          |    No    |  `array`  |         | If any alement is found within the `git diff` then this step will be SKIPPED                                                                                                  |
+| Option           | Required |   Type    | Default | Description                                                                                                                                                                                            |
+| ---------------- | :------: | :-------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| dynamic_pipeline |   Yes    | `string`  |         | The name including the path to the pipeline that contains all the actual `steps`                                                                                                                       |
+| disable_plugin   |    No    | `boolean` | `false` | This can be used to pass the entire `dynamic_pipeline` pipeline straight to buildkite without skipping a single step.                                                                                  |
+| diff             |    No    | `string`  |         | Can be used to override the default commands (see below for a better explanation of the defaults) Pass a comma-seperated string of git diff commands if you want multiple custom git diff commands run |
+| log_level        |    No    | `string`  | `INFO`  | The Level of logging to be used by the python script underneath. Pass `DEBUG` for verbose logging if errors occur                                                                                      |
+| steps            |   Yes    |  `array`  |         | Each Step should contain a `label` with the `include`/`exclude` settings relevant to the label it applies to within the `dynamic_pipeline` file                                                        |
+| label            |   Yes    | `string`  |         | The `label` these conditions apply to within the `dynamic_pipeline` file. (These should be an EXACT match)                                                                                             |
+| include          |    No    |  `array`  |         | If any element is found within the `git diff` then this step will NOT be skipped                                                                                                                       |
+| exclude          |    No    |  `array`  |         | If any alement is found within the `git diff` then this step will be SKIPPED                                                                                                                           |
 
 Other useful things to note:
 - Both `include` and `exclude` make use of Unix shell-style wildcards (Look at `.gitignore` files for inspiration)

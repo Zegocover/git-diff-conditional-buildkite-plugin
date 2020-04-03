@@ -148,56 +148,14 @@ class GitDiffConditional:
         return conditional_steps[label]
 
 
-def run_command(diff_command: str) -> list:
-    """Get the `git diff` based on given command
-
-    Args:
-        diff_command (str): The git command to use to get the diff
-
-    Returns:
-        list: Contains all the files changed according to git
-    """
+def get_diff():
     try:
-        result = subprocess.run(
-            diff_command, check=True, stdout=subprocess.PIPE, shell=True
-        ).stdout.decode("utf-8")
-    except subprocess.CalledProcessError as e:
-        LOG.debug(e)
-        log_and_exit("error", f"Error getting diff using command: {diff_command}", 1)
+        with open(".git_diff_conditional/git_diff", "r") as _fp:
+            diff = [_file.strip() for _file in _fp.readlines() if _file.strip() != ""]
+    except FileNotFoundError:
+        log_and_exit("error", "Error getting diff from file", 1)
     else:
-        return [_file for _file in result.replace(" ", "").split("\n") if _file != ""]
-
-
-def get_diff(plugin_prefix):
-    default_diff_commands = [
-        "git diff --name-only origin/master...HEAD",
-        "git diff --name-only HEAD HEAD~1",
-    ]
-    diff_command = os.getenv(f"{plugin_prefix}_DIFF", default_diff_commands)
-
-    diff = None
-    if isinstance(diff_command, list):
-        for command in diff_command:
-            diff = run_command(command)
-            if diff:
-                break
-    else:
-        command = diff_command
-        diff = run_command(command)
-
-    LOG.info("Got diff using command (%s)", command)
-
-    return diff
-
-
-def upload_pipeline(pipeline):
-    out = yaml.dump(pipeline, default_flow_style=False)
-
-    try:
-        subprocess.run([f'echo "{out}" | buildkite-agent pipeline upload'], shell=True)
-    except subprocess.CalledProcessError as e:
-        LOG.debug(e)
-        log_and_exit("error", "Error uploading pipeline", 1)
+        return diff
 
 
 def handler():
@@ -208,19 +166,13 @@ def handler():
     LOG.setLevel(log_level)
 
     # Get the git diff
-    diff = get_diff(plugin_prefix)
+    diff = get_diff()
 
     # Instantiate the Class
     git_diff_conditions = GitDiffConditional(diff, plugin_prefix)
 
     # Get the dynamic_pipeline
     dynamic_pipeline = git_diff_conditions.load_dynamic_pipeline("DYNAMIC_PIPELINE")
-
-    if os.getenv(f"{plugin_prefix}_DISABLE_PLUGIN"):
-        LOG.warning(
-            "Plugin disable flag detected, passing entire pipeline to buildkite"
-        )
-        return upload_pipeline(dynamic_pipeline)
 
     # Get the conditions
     conditions = git_diff_conditions.load_conditions_from_environment()
@@ -229,10 +181,17 @@ def handler():
     pipeline = git_diff_conditions.generate_pipeline_from_conditions(
         dynamic_pipeline, conditions
     )
-    if len(pipeline["steps"]) == 0:
-        log_and_exit("info", f"No pipeline generated for diff: ({diff})", 0)
 
-    upload_pipeline(pipeline)
+    if not pipeline["steps"]:
+        log_and_exit("info", f"No pipeline generated for diff: ({diff})", 0)
+    else:
+        LOG.info("Dynamic pipeline generated, saving for agent upload")
+
+        try:
+            with open(".git_diff_conditional/pipeline_output", "w") as _fp:
+                yaml.dump(pipeline, _fp, default_flow_style=False)
+        except Exception:
+            log_and_exit("error", "error saving pipeline to disk", 1)
 
 
 if __name__ == "__main__":

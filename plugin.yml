@@ -5,8 +5,6 @@ requirements:
   - docker
 configuration:
   properties:
-    git_mirrors_path:
-      type: string
     dynamic_pipeline:
       type: string
     disable_plugin:

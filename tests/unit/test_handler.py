@@ -4,64 +4,99 @@ from CONSTANTS import LOGGER_NAME, PLUGIN_PREFIX
 from scripts.generate_pipeline import GitDiffConditional, get_diff, handler
 
 
-# Tests
-def test_handler_disable_plugin(monkeypatch, logger, mocker):
-    monkeypatch.setenv(f"{PLUGIN_PREFIX}_DISABLE_PLUGIN", "true")
-    monkeypatch.setenv(f"{PLUGIN_PREFIX}_LOG_LEVEL", "DEBUG")
+# Mocks
+@pytest.fixture
+def get_diff_mock(mocker):
+    return mocker.patch("scripts.generate_pipeline.get_diff", return_value=[])
 
-    get_diff_mock = mocker.patch("scripts.generate_pipeline.get_diff", return_value=[])
-    upload_mock = mocker.patch("scripts.generate_pipeline.upload_pipeline")
+
+# Tests
+def setup_git_diff_conditional_mock(mocker, condition_return_value):
 
     return_value = mocker.MagicMock(
-        spec=GitDiffConditional, load_dynamic_pipeline=mocker.Mock(return_value={})
+        spec=GitDiffConditional,
+        load_dynamic_pipeline=mocker.Mock(return_value={}),
+        load_conditions_from_environment=mocker.Mock(return_value={}),
+        generate_pipeline_from_conditions=mocker.Mock(
+            return_value=condition_return_value
+        ),
     )
 
-    git_diff_conditional_mock = mocker.patch(
+    return mocker.patch(
         "scripts.generate_pipeline.GitDiffConditional", return_value=return_value
+    )
+
+
+def test_handler_empty_steps(
+    mocker, monkeypatch, logger, log_and_exit_mock, get_diff_mock
+):
+    monkeypatch.setenv(f"{PLUGIN_PREFIX}_LOG_LEVEL", "DEBUG")
+
+    open_mock = mocker.patch("scripts.generate_pipeline.open", mocker.mock_open())
+
+    git_diff_conditional_mock = setup_git_diff_conditional_mock(mocker, {"steps": []})
+
+    handler()
+
+    # Tests
+    assert logger.record_tuples == []
+    get_diff_mock.assert_called_once_with()
+    git_diff_conditional_mock.assert_called_once_with(
+        get_diff_mock.return_value, PLUGIN_PREFIX
+    )
+    log_and_exit_mock.assert_called_once_with(
+        "info", "No pipeline generated for diff: ([])", 0
+    )
+
+
+def test_handler_with_steps(
+    mocker, monkeypatch, logger, log_and_exit_mock, get_diff_mock
+):
+    monkeypatch.setenv(f"{PLUGIN_PREFIX}_LOG_LEVEL", "DEBUG")
+
+    open_mock = mocker.patch("scripts.generate_pipeline.open", mocker.mock_open())
+    git_diff_conditional_mock = setup_git_diff_conditional_mock(
+        mocker, {"steps": [{"label": "test"}]}
     )
 
     handler()
 
     # Tests
     assert logger.record_tuples == [
-        (
-            LOGGER_NAME,
-            30,
-            "Plugin disable flag detected, passing entire pipeline to buildkite",
-        )
+        ("cli", 20, "Dynamic pipeline generated, saving for agent upload")
     ]
-    upload_mock.assert_called_once_with({})
-    get_diff_mock.assert_called_once_with(PLUGIN_PREFIX)
+    get_diff_mock.assert_called_once_with()
     git_diff_conditional_mock.assert_called_once_with(
         get_diff_mock.return_value, PLUGIN_PREFIX
     )
+    open_mock.assert_called_once_with(".git_diff_conditional/pipeline_output", "w")
+    log_and_exit_mock.assert_not_called()
+
+    return None
 
 
-def test_handler_empty_steps(mocker, monkeypatch, logger, log_and_exit_mock):
+def test_handler_error_saving_pipeline(
+    mocker, monkeypatch, logger, log_and_exit_mock, get_diff_mock
+):
     monkeypatch.setenv(f"{PLUGIN_PREFIX}_LOG_LEVEL", "DEBUG")
 
-    get_diff_mock = mocker.patch("scripts.generate_pipeline.get_diff", return_value=[])
-    upload_mock = mocker.patch("scripts.generate_pipeline.upload_pipeline")
+    open_mock = mocker.patch("scripts.generate_pipeline.open", side_effect=Exception)
 
-    return_value = mocker.MagicMock(
-        spec=GitDiffConditional,
-        load_dynamic_pipeline=mocker.Mock(return_value={}),
-        load_conditions_from_environment=mocker.Mock(return_value={}),
-        generate_pipeline_from_conditions=mocker.Mock(return_value={"steps": []}),
-    )
-
-    git_diff_conditional_mock = mocker.patch(
-        "scripts.generate_pipeline.GitDiffConditional", return_value=return_value
+    git_diff_conditional_mock = setup_git_diff_conditional_mock(
+        mocker, {"steps": [{"label": "test"}]}
     )
 
     handler()
 
     # Tests
-    assert logger.record_tuples == []
-    get_diff_mock.assert_called_once_with(PLUGIN_PREFIX)
+    assert logger.record_tuples == [
+        ("cli", 20, "Dynamic pipeline generated, saving for agent upload")
+    ]
+    get_diff_mock.assert_called_once_with()
     git_diff_conditional_mock.assert_called_once_with(
         get_diff_mock.return_value, PLUGIN_PREFIX
     )
+    open_mock.assert_called_once_with(".git_diff_conditional/pipeline_output", "w")
     log_and_exit_mock.assert_called_once_with(
-        "info", "No pipeline generated for diff: ([])", 0
+        "error", "error saving pipeline to disk", 1
     )
