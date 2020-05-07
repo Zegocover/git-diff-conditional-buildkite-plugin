@@ -20,7 +20,7 @@ Please see the below examples on how to use this plugin with buildkite. The [bui
 steps:
   - label: ":partyparrot: Creating the pipeline"
     plugins:
-      - Zegocover/git-diff-conditional#v0.2.0:
+      - Zegocover/git-diff-conditional#v1.0.0:
           dynamic_pipeline: ".buildkite/dynamic_pipeline.yml"
           steps:
             - label: "build and deploy lambda"
@@ -92,7 +92,7 @@ Please read [CONTRIBUTING](https://github.com/Zegocover/git-diff-conditional-bui
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/tags). 
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/tags).
 
 ## Authors
 
