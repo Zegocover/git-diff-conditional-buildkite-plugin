@@ -1,7 +1,7 @@
 import pytest
+from CONSTANTS import PLUGIN_PREFIX
 
-from CONSTANTS import LOGGER_NAME, PLUGIN_PREFIX
-from scripts.generate_pipeline import GitDiffConditional, get_diff, handler
+from scripts.generate_pipeline import GitDiffConditional, handler
 
 
 # Mocks
@@ -40,6 +40,7 @@ def test_handler_empty_steps(
 
     # Tests
     assert logger.record_tuples == []
+    open_mock.assert_not_called()
     get_diff_mock.assert_called_once_with()
     git_diff_conditional_mock.assert_called_once_with(
         get_diff_mock.return_value, PLUGIN_PREFIX

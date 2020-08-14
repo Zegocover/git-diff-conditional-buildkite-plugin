@@ -1,7 +1,6 @@
 import pytest
-from yaml.scanner import ScannerError
-
 from CONSTANTS import LOGGER_NAME, PLUGIN_PREFIX
+
 from scripts.generate_pipeline import GitDiffConditional
 
 # Fixtures
