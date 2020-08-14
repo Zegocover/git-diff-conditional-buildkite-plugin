@@ -26,6 +26,6 @@ services:
     build:
       context: .
       dockerfile: tests/Dockerfile
-    command: ["isort", ".", "--check-only", "--recursive"]
+    command: ["isort", ".", "--check-only"]
     volumes:
       - .:/buildkite
