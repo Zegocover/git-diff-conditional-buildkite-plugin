@@ -52,8 +52,7 @@ class GitDiffConditional:
             return pipeline
 
     def load_conditions_from_environment(self) -> dict:
-        """Loads the defined conditions from the environment variables
-        """
+        """Loads the defined conditions from the environment variables"""
         regex = re.compile(f"{self.plugin_prefix}_STEPS_[0-9]*_LABEL")
         step_labels = {k: v for k, v in os.environ.items() if re.search(regex, k)}
 
