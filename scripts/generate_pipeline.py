@@ -3,7 +3,6 @@
 import logging
 import os
 import re
-import subprocess
 import sys
 from fnmatch import fnmatch
 

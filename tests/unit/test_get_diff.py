@@ -1,8 +1,5 @@
-import subprocess
-
 import pytest
 
-from CONSTANTS import PLUGIN_PREFIX
 from scripts.generate_pipeline import get_diff
 
 #
@@ -28,7 +25,10 @@ def test_get_diff(mocker, file_contents, expected_result):
     )
 
     result = get_diff()
+
+    # Tests
     assert result == expected_result
+    open_mock.assert_called_once_with(".git_diff_conditional/git_diff", "r")
 
 
 def test_get_diff_no_file(mocker, log_and_exit_mock):
@@ -37,7 +37,10 @@ def test_get_diff_no_file(mocker, log_and_exit_mock):
     )
 
     result = get_diff()
+
+    # Tests
     assert result is None
+    open_mock.assert_called_once_with(".git_diff_conditional/git_diff", "r")
     log_and_exit_mock.assert_called_once_with(
         "error", "Error getting diff from file", 1
     )
