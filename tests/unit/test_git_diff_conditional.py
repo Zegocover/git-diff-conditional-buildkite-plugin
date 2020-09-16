@@ -164,7 +164,11 @@ def test_generate_skip_empty(logger, git_diff_conditional):
     ],
 )
 def test_load_conditions_from_environment(
-    monkeypatch, git_diff_conditional, pipeline_as_env, diff, expected_result,
+    monkeypatch,
+    git_diff_conditional,
+    pipeline_as_env,
+    diff,
+    expected_result,
 ):
 
     for key, value in pipeline_as_env.items():
