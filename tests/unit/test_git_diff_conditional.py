@@ -206,13 +206,24 @@ def test_load_conditions_from_environment(
             [{"label": "test_3", "skip": True}, {"label": "test_3_a", "skip": False}],
         ),  # skip true/false
         (
-            [{"label": "test_4_label"}, {"block": "test_4_block"}],
+            [{"label": "test_4_label"}, "wait", {"block": "test_4_block"}],
             {"test_4_label": True, "test_4_block": True},
             [
                 {"label": "test_4_label", "skip": True},
+                "wait",
                 {"block": "test_4_block", "skip": True},
             ],
         ),  # Check label and block
+        (
+            ["wait"],
+            {},
+            ["wait"],
+        ),  # basic wait step
+        (
+            [{"wait": None, "continue_on_failure": True}],
+            {},
+            [{"wait": None, "continue_on_failure": True}],
+        ),  # dictionary wait step
     ],
 )
 def test_generate_pipeline_from_conditions(

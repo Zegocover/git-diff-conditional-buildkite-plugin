@@ -121,7 +121,7 @@ class GitDiffConditional:
         pipeline = {"steps": []}
 
         for step in dynamic_pipeline["steps"]:
-            if isinstance(step, dict):
+            if isinstance(step, dict) and "wait" not in step.keys():
                 # Only check for actual steps, not waits
                 step["skip"] = self.check_if_skip(conditions, step)
 
