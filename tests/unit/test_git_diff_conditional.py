@@ -170,7 +170,6 @@ def test_load_conditions_from_environment(
     diff,
     expected_result,
 ):
-
     for key, value in pipeline_as_env.items():
         monkeypatch.setenv(f"{PLUGIN_PREFIX}_STEPS_{key}", value)
 

@@ -12,7 +12,6 @@ def get_diff_mock(mocker):
 
 # Tests
 def setup_git_diff_conditional_mock(mocker, condition_return_value):
-
     return_value = mocker.MagicMock(
         spec=GitDiffConditional,
         load_dynamic_pipeline=mocker.Mock(return_value={}),
