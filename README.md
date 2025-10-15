@@ -97,7 +97,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## Authors
 
 * **Jack** - *Initial work* - [jack1902](https://github.com/jack1902)
-* **Elliot** - *Initial work* - [wizardels](https://github.com/wizardels)
+* **Elliot** - *Initial work* - [elliotwestlake](https://github.com/elliotwestlake)
 
 See also the list of [contributors](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/contributors) who participated in this project.
 
