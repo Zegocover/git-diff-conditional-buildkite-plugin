@@ -1,5 +1,8 @@
 # git-diff-conditional-buildkite-plugin
 
+> [!CAUTION]
+> **This Buildkite plugin will no longer be maintained. The repo has been archived as of 28th April, 2026.**
+
 ![Github Actions: Testing & Linting](https://github.com/Zegocover/git-diff-conditional-buildkite-plugin/workflows/Run%20CI%20Testing%20&%20Linting/badge.svg)
 
 This plugin can be used to create a dynamic pipeline based on your `git diff`. This requires TWO pipeline files in total and uses `docker` to run the plugin:
