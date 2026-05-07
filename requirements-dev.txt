@@ -1,6 +1,6 @@
 -r requirements.txt
 # Install dev requirements
-pytest==5.4.1
+pytest==9.0.3
 pytest-mock==2.0.0
 pytest-randomly==3.2.1
 pytest-cov==2.8.1
